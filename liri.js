@@ -1,4 +1,5 @@
 require('dotenv').config();
+require('colors');
 
 const Twitter = require('twitter');
 const Spotify = require('node-spotify-api');
@@ -12,13 +13,25 @@ global.ops = {
 
 
   my_tweets: () => {
-    console.log('twitter');
 
-    client.get('statuses/user_timeline', {screen_name: 'nodejs'},
-      function (error, tweets, response) {
+    client.get('statuses/user_timeline',
+      {count: 20},
+      (error, tweets) => {
+
         if (!error) {
-          console.log(JSON.stringify(tweets, null, 2));
+          console.log(
+            `----- ${tweets[0].user.name}'s Recent Tweets -----\n`
+              .toUpperCase().cyan);
+
+          tweets.forEach((item, index) => {
+            console.log(
+              `--- ${index}. Published: ${item.created_at} ---\n`.green +
+              `\n"${item.text}"\n`.blue
+            );
+          });
+          process.exit()
         }
+        console.log(error)
       });
   },
 
@@ -43,8 +56,8 @@ function takeInput() {
   const command = process.argv
     .splice(3, process.argv.length - 2).join().replace(/,/g, ' ');
   try {
-  global.ops[service](
-    typeof command !== 'undefined' ? command : null)
+    global.ops[service](
+      typeof command !== 'undefined' ? command : null)
   }
   catch (e) {
     console.log('invalid command \n' + e)

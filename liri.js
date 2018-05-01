@@ -1,13 +1,16 @@
+//omdb key 52411065
+
 require('dotenv').config();
 require('colors');
 
+const fs = require('fs');
 const Twitter = require('twitter');
 const Spotify = require('node-spotify-api');
+const req = require('request');
 const keys = require('./keys');
 const spotify = new Spotify(keys.spotify);
 const client = new Twitter(keys.twitter);
-const req = require('request');
-
+const omdb = keys.OMDB.key;
 
 global.ops = {
 
@@ -36,17 +39,60 @@ global.ops = {
   },
 
   spotify_this_song: song => {
-    console.log('spotify')
+
+    spotify.search(
+      {type: 'track', query: song, limit: 1},
+      (error, data) => {
+        if (!error) {
+          console.log(
+            `----- SPOTIFY Results For ${song} ------\n\n`.toUpperCase().cyan +
+            `Title: ${data.tracks.items[0].name}\n`.blue +
+            `Album: ${data.tracks.items[0].album.name}\n`.blue +
+            `Artist: ${data.tracks.items[0].artists[0].name}\n`.blue +
+            `Preview: ${data.tracks.items[0].preview_url}\n\n`.blue
+          );
+          process.exit()
+        }
+        console.log(error)
+      }
+    )
 
   },
 
   movie_this: movie => {
-    console.log('omdb')
-
+    req(
+      `https://www.omdbapi.com/?apikey=${omdb}&t=${movie}`,
+      (error, res) => {
+        const data = JSON.parse(res.body);
+        if (!error) {
+          console.log(
+            `----- OMDB Results For ${movie} ------\n\n`.toUpperCase().cyan +
+            `Title: ${data.Title}\n`.blue +
+            `Released: ${data.Released}\n`.blue +
+            `Rotten Tomatoes: ${data.Ratings[1].Value}\n`.blue +
+            `Produced In: ${data.Country}\n`.blue +
+            `Language: ${data.Language}\n`.blue +
+            `Plot: ${data.Plot}\n`.blue +
+            `Actors: ${data.Actors}\n`.blue
+          );
+          process.exit()
+        }
+        console.log(error);
+      }
+    );
   },
 
-  do_what_it_says: thing => {
-    console.log('do it')
+  do_what_it_says: () => {
+    fs.readFile('./random.txt', {encoding: 'utf8'}, (error, data) => {
+      if(!error) {
+        const parsed = data.split(',');
+        global.ops[parsed[0].replace(/-/g, '_')](parsed[1].replace(/"/g, ''))
+
+      }
+      else {
+        console.log('random.txt could not be read')
+      }
+    });
 
   }
 };

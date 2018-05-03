@@ -20,12 +20,10 @@ global.ops = {
     client.get('statuses/user_timeline',
       {count: 20},
       (error, tweets) => {
-
         if (!error) {
           let output = (
             `----- ${tweets[0].user.name}'s Recent Tweets -----\n\n`
               .toUpperCase().cyan);
-
           tweets.forEach((item, index) => {
             output += (
               `--- ${index}. Published: ${item.created_at.split(' ')
@@ -96,7 +94,6 @@ global.ops = {
       if (!error) {
         const parsed = data.split(',');
         global.ops[parsed[0].replace(/-/g, '_')](parsed[1].replace(/"/g, ''))
-
       }
       else {
         console.log('random.txt could not be read')

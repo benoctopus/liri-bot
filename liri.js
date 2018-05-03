@@ -127,7 +127,7 @@ function takeInput() {
 function log(out) {
   console.log('saving to log...'.yellow);
   fs.stat('log.txt', (err, st) => {
-    if (!!err) {
+    if (err === 'ENOENT') {
       fs.writeFileSync(
         'log.txt', 'log.txt', 'created: ' + new Date() + '\n\n' + out);
       console.log('log.txt successfully written!!'.green);

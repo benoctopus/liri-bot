@@ -4,6 +4,7 @@ require('dotenv').config();
 require('colors');
 
 const fs = require('fs');
+const moment = require('moment');
 const Twitter = require('twitter');
 const Spotify = require('node-spotify-api');
 const req = require('request');
@@ -22,16 +23,20 @@ global.ops = {
       (error, tweets) => {
 
         if (!error) {
-          console.log(
-            `----- ${tweets[0].user.name}'s Recent Tweets -----\n`
+          let output = (
+            `----- ${tweets[0].user.name}'s Recent Tweets -----\n\n`
               .toUpperCase().cyan);
 
           tweets.forEach((item, index) => {
-            console.log(
-              `--- ${index}. Published: ${item.created_at} ---\n`.green +
-              `\n"${item.text}"\n`.blue
+            output += (
+              `--- ${index}. Published: ${item.created_at.split(' ')
+                .splice(0, item.created_at.length - 2)
+                .join().replace(/,/g, ' ')} ---\n`.green +
+              `\n"${item.text}"\n\n`.blue
             );
           });
+          console.log(output);
+          log(output);
           process.exit()
         }
         console.log(error)
@@ -44,28 +49,32 @@ global.ops = {
       {type: 'track', query: song, limit: 1},
       (error, data) => {
         if (!error) {
-          console.log(
+          let output = (
             `----- SPOTIFY Results For ${song} ------\n\n`.toUpperCase().cyan +
             `Title: ${data.tracks.items[0].name}\n`.blue +
             `Album: ${data.tracks.items[0].album.name}\n`.blue +
             `Artist: ${data.tracks.items[0].artists[0].name}\n`.blue +
             `Preview: ${data.tracks.items[0].preview_url}\n\n`.blue
           );
+          console.log(output);
+          log(output);
           process.exit()
         }
-        console.log(error)
+        console.log(error);
+        process.exit()
       }
     )
 
   },
 
   movie_this: movie => {
+
     req(
       `https://www.omdbapi.com/?apikey=${omdb}&t=${movie}`,
       (error, res) => {
         const data = JSON.parse(res.body);
         if (!error) {
-          console.log(
+          let output = (
             `----- OMDB Results For ${movie} ------\n\n`.toUpperCase().cyan +
             `Title: ${data.Title}\n`.blue +
             `Released: ${data.Released}\n`.blue +
@@ -75,16 +84,20 @@ global.ops = {
             `Plot: ${data.Plot}\n`.blue +
             `Actors: ${data.Actors}\n`.blue
           );
+          console.log(output);
+          log(output);
           process.exit()
         }
         console.log(error);
+        process.exit()
       }
     );
   },
 
   do_what_it_says: () => {
+
     fs.readFile('./random.txt', {encoding: 'utf8'}, (error, data) => {
-      if(!error) {
+      if (!error) {
         const parsed = data.split(',');
         global.ops[parsed[0].replace(/-/g, '_')](parsed[1].replace(/"/g, ''))
 
@@ -98,6 +111,7 @@ global.ops = {
 };
 
 function takeInput() {
+
   const service = process.argv[2].replace(/-/g, '_').toLowerCase();
   const command = process.argv
     .splice(3, process.argv.length - 2).join().replace(/,/g, ' ');
@@ -110,5 +124,28 @@ function takeInput() {
   }
 }
 
+function log(out) {
+  console.log('saving to log...'.yellow);
+  fs.stat('log.txt', (err, st) => {
+    if (!!err) {
+      fs.writeFileSync(
+        'log.txt', 'log.txt', 'created: ' + new Date() + '\n\n' + out);
+      console.log('log.txt successfully written!!'.green);
+      process.exit()
+    }
+    else if (!!err && err.code !== 'ENOENT') {
+      console.log(err.code);
+      process.exit()
+    }
+  });
+  fs.appendFileSync('log.txt', 'created: ' + new Date() + '\n\n' + out,
+    {encoding: 'utf8'}, (err, data) => {
+      console.log(err, data)
+    });
+  console.log('success!!'.green);
+  process.exit()
+}
 
+
+//magic happens here
 takeInput();

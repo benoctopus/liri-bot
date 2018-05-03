@@ -1,4 +1,3 @@
-//omdb key 52411065
 
 require('dotenv').config();
 require('colors');
@@ -37,7 +36,6 @@ global.ops = {
           });
           console.log(output);
           log(output);
-          process.exit()
         }
         console.log(error)
       });
@@ -58,7 +56,6 @@ global.ops = {
           );
           console.log(output);
           log(output);
-          process.exit()
         }
         console.log(error);
         process.exit()
@@ -86,7 +83,6 @@ global.ops = {
           );
           console.log(output);
           log(output);
-          process.exit()
         }
         console.log(error);
         process.exit()
@@ -120,7 +116,17 @@ function takeInput() {
       typeof command !== 'undefined' ? command : null)
   }
   catch (e) {
-    console.log('invalid command \n' + e)
+    console.log('invalid command \n\n'
+      + `Available commands:
+      *my_tweets
+        - gather last 20 tweets
+      *spotify-this-song [song]
+        - gather spotify data on song
+      *movie-this [movie]
+        - gather data on movie
+      *do-what-it-says
+        - read and execute command in random.txt`
+    );
   }
 }
 

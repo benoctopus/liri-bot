@@ -3,7 +3,6 @@ require('dotenv').config();
 require('colors');
 
 const fs = require('fs');
-const moment = require('moment');
 const Twitter = require('twitter');
 const Spotify = require('node-spotify-api');
 const req = require('request');

@@ -124,6 +124,7 @@ function takeInput() {
       *do-what-it-says
         - read and execute command in random.txt`
     );
+    process.exit()
   }
 }
 
